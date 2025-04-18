@@ -18,50 +18,50 @@ Element createElement(int freq, Node* node){
     return e;
 }
 
-void main(){
-    FILE *fptr = fopen("input.txt","r");
+// void main(){
+//     FILE *fptr = fopen("input.txt","r");
 
-    if(!fptr){
-        printf("Error opening file!");
-        return;
-    }
+//     if(!fptr){
+//         printf("Error opening file!");
+//         return;
+//     }
 
-    int characterSet[128];
-    for(int i = 0 ; i < 128 ; i++){
-        characterSet[i] = 0;
-    }
+//     int characterSet[128];
+//     for(int i = 0 ; i < 128 ; i++){
+//         characterSet[i] = 0;
+//     }
 
-    char line[1000];
-    while(fgets(line,1000,fptr)){
-        for(int i = 0 ; i < strlen(line)-1; i++){
-            characterSet[line[i]]++;
-        }
-    }
+//     char line[1000];
+//     while(fgets(line,1000,fptr)){
+//         for(int i = 0 ; i < strlen(line)-1; i++){
+//             characterSet[line[i]]++;
+//         }
+//     }
 
-    Heap* h = heap_create();
+//     Heap* h = heap_create();
 
-    for(int i = 0 ; i < 128 ; i++){
-        if(characterSet[i] == 0) continue;
-        Node* newNode = createNode((char)i);
-        Element element = createElement(characterSet[i],newNode);
+//     for(int i = 0 ; i < 128 ; i++){
+//         if(characterSet[i] == 0) continue;
+//         Node* newNode = createNode((char)i);
+//         Element element = createElement(characterSet[i],newNode);
 
-        insert(h,element);
-    }
+//         insert(h,element);
+//     }
 
-    build_max_heap(h);
+//     build_max_heap(h);
 
-    while(h->size > 1){
-        Element e1 = extract_maximum(h);
-        Element e2 = extract_maximum(h);
+//     while(h->size > 1){
+//         Element e1 = extract_maximum(h);
+//         Element e2 = extract_maximum(h);
 
-        Node* newNode = createNode(' ');
-        newNode->right = e2.node;
-        newNode->left = e1.node;
+//         Node* newNode = createNode(' ');
+//         newNode->right = e2.node;
+//         newNode->left = e1.node;
 
-        Element newEle = createElement(e1.freq + e2.freq, newNode);
-        insert(h,newEle);
-    }
+//         Element newEle = createElement(e1.freq + e2.freq, newNode);
+//         insert(h,newEle);
+//     }
 
-    Element ele = extract_maximum(h);
+//     Element ele = extract_maximum(h);
 
-}
+// }
