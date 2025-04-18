@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "huffman-tree.h": "c",
+        "stdio.h": "c"
+    }
+}
