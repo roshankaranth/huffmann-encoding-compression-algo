@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "huffman-tree.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "encoding.h": "c",
+        "min-heap.h": "c"
     }
 }
