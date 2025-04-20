@@ -240,13 +240,40 @@ Node* createHuffmanTree(FILE* fptr){
 
 FILE* encoding(FILE* inputFile){
     FILE* fptr = fopen("data_compressed.bin","wb");
-    char line[1000];
-    while(fgets(line,1000,inputFile)){
-        for(int i = 0 ; i < strlen(line)-1; i++){
-            int code = encoding_arr[line[i]];
-            //writeCodeToFile(fptr,code);
+    
+    char ch;
+    char buffer = (char)0;
+    int left = 8;
+    while((ch = (char)fgetc(inputFile)) != EOF){
+        int code = encoding_arr[ch];
+        int index = 7;
+        while((((code>>index) & 1) == 0) && index >= 0){
+            index--;
+        } 
+
+        if(index == -1){
+            left--;
+            if(left==0){
+
+                fputc(buffer,fptr);
+                buffer = (char)0;
+                left = 8;
+            }
+        }else{
+            while(index >= 0){
+                buffer = buffer|(((code>>index) & 1)<<(left-1));
+                index--;
+                left--;
+                if(left==0){
+    
+                    fputc(buffer,fptr);
+                    buffer = (char)0;
+                    left = 8;
+                }
+            }
         }
     }
+    if(left != 8) fputc(buffer,fptr);
 
     return fptr;
 }
@@ -265,9 +292,9 @@ void main(){
 
     Node* rootHuffmanTree = createHuffmanTree(fptr); 
     recursiveTraverse(0,rootHuffmanTree);
-    
+    fseek(fptr,0,SEEK_SET);
     //encoding input file
     FILE* outputFile = encoding(fptr);
     // //decoding compressed file
-    // decoding(outputFile, rootHuffmanTree);
+    //decoding(outputFile, rootHuffmanTree);
 }
