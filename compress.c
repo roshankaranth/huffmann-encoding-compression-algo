@@ -238,8 +238,8 @@ Node* createHuffmanTree(FILE* fptr){
     return ele.node;
 }
 
-FILE* encoding(FILE* inputFile){
-    FILE* fptr = fopen("data_compressed.bin","wb");
+FILE* encoding(FILE* inputFile, int* size){
+    FILE* fptr = fopen("data_compressed.bin","wb+");
     
     char ch;
     char buffer = (char)0;
@@ -254,7 +254,8 @@ FILE* encoding(FILE* inputFile){
         if(index == -1){
             left--;
             if(left==0){
-
+                (*size)++;
+                //printf("%d ", (int)buffer);
                 fputc(buffer,fptr);
                 buffer = (char)0;
                 left = 8;
@@ -265,7 +266,8 @@ FILE* encoding(FILE* inputFile){
                 index--;
                 left--;
                 if(left==0){
-    
+                    (*size)++;
+                    //printf("%d ", (int)buffer);   
                     fputc(buffer,fptr);
                     buffer = (char)0;
                     left = 8;
@@ -273,13 +275,44 @@ FILE* encoding(FILE* inputFile){
             }
         }
     }
-    if(left != 8) fputc(buffer,fptr);
+    if(left != 8){
+        (*size)++;
+        //fputc(buffer,fptr);
+    } 
 
     return fptr;
 }
 
-void decoding(FILE* data_compressed, Node* root){
-    
+void decoding(FILE* data_compressed, Node* root, int size){
+
+    FILE* fptr = fopen("output.txt", "w");
+    if(fptr == NULL){
+        printf("Error opening file!");
+        return;
+    }
+
+    Node* pCrawl = root;
+    char buffer;
+    while(size){
+        buffer = (char)fgetc(data_compressed);
+        int index = 7;
+        //printf("%d ", (int)buffer);
+        while(index>=0){
+            if(((buffer>>index)&1) == 0) pCrawl = pCrawl->left;
+            else pCrawl = pCrawl->right;
+
+            if((pCrawl->left == NULL && pCrawl->right == NULL) || pCrawl == NULL){
+                putc(pCrawl->data,fptr);
+                pCrawl = root;
+                // if(((buffer>>index)&1) == 0) pCrawl = pCrawl->left;
+                // else pCrawl = pCrawl->right;
+            }
+
+            index--;
+        }
+
+        size--;
+    }
 }
 
 void main(){
@@ -294,7 +327,9 @@ void main(){
     recursiveTraverse(0,rootHuffmanTree);
     fseek(fptr,0,SEEK_SET);
     //encoding input file
-    FILE* outputFile = encoding(fptr);
-    // //decoding compressed file
-    //decoding(outputFile, rootHuffmanTree);
+    int size = 0;
+    FILE* outputFile = encoding(fptr, &size);
+    fseek(outputFile,0,SEEK_SET);
+    //decoding compressed file
+    decoding(outputFile, rootHuffmanTree, size);
 }
