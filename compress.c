@@ -277,7 +277,7 @@ FILE* encoding(FILE* inputFile, int* size){
     }
     if(left != 8){
         (*size)++;
-        //fputc(buffer,fptr);
+        fputc(buffer,fptr);
     } 
 
     return fptr;
@@ -302,10 +302,11 @@ void decoding(FILE* data_compressed, Node* root, int size){
             else pCrawl = pCrawl->right;
 
             if((pCrawl->left == NULL && pCrawl->right == NULL) || pCrawl == NULL){
+                //printf("%c", pCrawl->data);
+                if(pCrawl == NULL) pCrawl = root;
                 putc(pCrawl->data,fptr);
                 pCrawl = root;
-                // if(((buffer>>index)&1) == 0) pCrawl = pCrawl->left;
-                // else pCrawl = pCrawl->right;
+
             }
 
             index--;
@@ -315,6 +316,52 @@ void decoding(FILE* data_compressed, Node* root, int size){
     }
 }
 
+void serializationHelper(Node* node, FILE* fptr){
+    if(node == NULL){
+        fputc('-',fptr);
+        return;
+    }
+    fputc(node->data,fptr);
+    serializationHelper(node->left,fptr);
+    serializationHelper(node->right,fptr);
+}
+
+FILE* serialization(Node* root){
+
+    FILE* fptr = fopen("encoding_table.txt", "w+");
+    if(fptr == NULL){
+        printf("Error opening file!");
+        return NULL;
+    }
+    serializationHelper(root,fptr);
+    return fptr;
+}
+
+Node* deserialization(FILE* fptr){
+    char ch = fgetc(fptr);
+    if(ch == EOF) return NULL;
+    if(ch == '-'){
+        return NULL;
+    }
+    Node* node = createNode(ch);
+    node->left = deserialization(fptr);
+    node->right = deserialization(fptr);
+
+    return node;
+}
+
+void preorder(Node* node){
+    if(node == NULL){
+        printf("-");
+        return;
+    }
+
+    printf("%c", node->data);
+    preorder(node->left);
+    preorder(node->right);
+}
+
+
 void main(){
     
     FILE* fptr = fopen("input.txt","r");
@@ -323,13 +370,33 @@ void main(){
         return;
     }
 
+    //creating huffman tree and encoding array
     Node* rootHuffmanTree = createHuffmanTree(fptr); 
     recursiveTraverse(0,rootHuffmanTree);
+
+    //reset pointer
     fseek(fptr,0,SEEK_SET);
+
     //encoding input file
     int size = 0;
     FILE* outputFile = encoding(fptr, &size);
+
+    //serializing encoding table
+    FILE* encodingTable = serialization(rootHuffmanTree);
+
+   
+
+    //reset pointer
+    fseek(encodingTable,0,SEEK_SET);
+
+    //deserializing encoding table
+    Node* deserializedRoot = deserialization(encodingTable);
+    //preorder(deserializedRoot);
+
+
+    //reset pointer
     fseek(outputFile,0,SEEK_SET);
+
     //decoding compressed file
     decoding(outputFile, rootHuffmanTree, size);
 }
